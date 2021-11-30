@@ -1,0 +1,40 @@
+Sections are seperated by \ (5C)
+
+0: Save Header (31+1)
+magic(4) - 01 4B 55 02 - SOH K U STX
+datetime(7) - YY YY MM DD hh mm ss - state datetime as hexadecimal numbers
+seed(20)
+---
+1: Player Info Section (24+1)
+name(16) - 00 are ignored
+last_position(2) - if not in range of hexadecimal 00 - 23, raise error, defaults to world spawn
+score(5) - reversed (earlier bytes are the rightmost numbers) - if not in range of hexadecimal 00 - 09, raise error
+highest_tier(1) - if not in range of hexadecimal 00 - 04, raise error
+---
+2: Player Boolean Section (3+1)
+00 is false, FF is true, if not 00 or FF, raise error
+dead(1) - if true, the game doesn't start, display death message
+can_escape(1) - if true, the turtle can freely travel without the need to kill all monsters in the region
+can_swim(1) - if true, the turtle can go into water regions
+---
+3: Player Inventory Section (...+1)
+* For item codes, refer to the item reference at the end of file. If any item does not exist in reference, raise error
+equipped(2) - two bytes represent the two slots, q and e respectively. 00 means nothing is equipped
+inventory(...) - no maximum length, if an item is added the length increases
+---
+4: World Stats Section ()
+time_elapsed(5) - reversed (earlier bytes are the rightmost numbers) - if not in range of hexadecimal 00 - 09, raise error
+
+
+
+Item Reference
+---
+
+Equippable
+A0 - 
+A1 - 
+A2 -
+
+Special
+FE - Raft - turns can_swim to FF
+FF - Ward Totem - turns can_escape to FF

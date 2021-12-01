@@ -22,7 +22,7 @@ can_swim(1) - if true, the turtle can go into water regions
 equipped(2) - two bytes represent the two slots, q and e respectively. 00 means nothing is equipped
 inventory(...) - no maximum length, if an item is added the length increases
 ---
-4: World Stats Section ()
+4: World Stats Section (5)
 time_elapsed(5) - reversed (earlier bytes are the rightmost numbers) - if not in range of hexadecimal 00 - 09, raise error
 
 

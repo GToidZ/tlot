@@ -27,9 +27,11 @@ class LivingEntity(Entity):
 
 class Item:
 
-    def __init__(self, name, description):
+    def __init__(self, key, name, description, sprite):
+        self.key = key
         self.name = name
         self.description = description
+        self._sprite = sprite
 
     def use(self):
         pass

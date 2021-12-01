@@ -321,7 +321,7 @@ class ThroneRegion(LandRegion):
         pass
 
 
-world = GameWorld("Test")
+""" world = GameWorld("Test")
 print(world.seed)
 print(world.spawnpoint)
-world.ascii_map()
+world.ascii_map() """

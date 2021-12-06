@@ -1,4 +1,5 @@
 import time
+from threading import Timer
 
 class Item:
 
@@ -29,20 +30,46 @@ class Inventory:
         self.items.append(item)
         if not isinstance(item, SpecialItem):
             self.active.append(item)
-        print(self.items, self.active)
 
-class InvisibilityPot(Item):
+class InvincibilityPot(Item):
     
     def __init__(self):
-        super().__init__("A0", "Invisibility Potion", "Turn invisible in just a sip.")
+        super().__init__("A0", "Invincibility Potion",
+                         "Temporal immortality in just a sip.")
+        self.using = False
 
     def use(self, player):
-        print(f"[{player.player.name}] used Invisibilty Potion")
-        player.hideturtle()
-        self.playeffect(player)
+        if self.using: return
+        self.using = True
+        player.invincible = True
+        t = Timer(5, self.cancel, [player])
+        t.start()
 
-    def playeffect(self, player):
-        target = time.time() + 10
-        while time.time() < target:
-            pass
-        player.showturtle()
+    def cancel(self, player):
+        player.invincible = False
+        self.using = False
+
+class LemonJuice(Item):
+    
+    def __init__(self):
+        super().__init__("A1", "Lemon Juice", "Go faster!")
+        self.using = False
+
+    def use(self, player):
+        if self.using: return
+        self.using = True
+        player.speedmod = 2
+        t = Timer(5, self.cancel, [player])
+        t.start()
+
+    def cancel(self, player):
+        player.speedmod = 1
+        self.using = False
+
+class Raft(SpecialItem):
+    
+    def __init__(self):
+        super().__init__("FE", "Raft", "Traverse the waters!")
+
+    def use(self, player):
+        player.get_player().can_swim = True

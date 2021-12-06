@@ -32,10 +32,11 @@ world_items(3*6) - follows the format of REGION_X, REGION_Y, ITEM_CODE where REG
 Item Reference
 ---
 
-Equippable (Spawn 4 from the list)
-A0 - 
-A1 - 
-A2 -
+Equippables
+A0 - Invicibility Potion - allows player to turn invincible for 3 seconds
+A1 - Lemon Juice - allows player to move quicker for 5 seconds
+A2 - Bow & Arrow - shoots arrow to damage enemy
+A3 - Hyper Beam - deals damage to enemies in a line (once per level)
 
 Special (Always spawn)
 FE - Raft - turns can_swim to FF

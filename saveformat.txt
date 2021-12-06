@@ -9,7 +9,7 @@ seed(20)
 name(16) - 00 are ignored
 last_position(2) - if not in range of hexadecimal 00 - 23, raise error, defaults to world spawn
 score(5) - reversed (earlier bytes are the rightmost numbers) - if not in range of hexadecimal 00 - 09, raise error
-highest_tier(1) - if not in range of hexadecimal 00 - 04, raise error
+current_hp(1) - if not in range of hexadecimal 00 - 10, raise error
 ---
 2: Player Boolean Section (3+1)
 00 is false, FF is true, if not 00 or FF, raise error
@@ -22,19 +22,21 @@ can_swim(1) - if true, the turtle can go into water regions
 equipped(2) - two bytes represent the two slots, q and e respectively. 00 means nothing is equipped
 inventory(...) - no maximum length, if an item is added the length increases
 ---
-4: World Stats Section (5)
+4: World Stats Section (23+1)
 time_elapsed(5) - reversed (earlier bytes are the rightmost numbers) - if not in range of hexadecimal 00 - 09, raise error
+world_items(3*6) - follows the format of REGION_X, REGION_Y, ITEM_CODE where REGION_? must be range of hexadecimal of 00 - 23
+
 
 
 
 Item Reference
 ---
 
-Equippable
+Equippable (Spawn 4 from the list)
 A0 - 
 A1 - 
 A2 -
 
-Special
+Special (Always spawn)
 FE - Raft - turns can_swim to FF
 FF - Ward Totem - turns can_escape to FF

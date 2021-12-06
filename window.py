@@ -1,16 +1,15 @@
 import turtle
 import time
+import entities
 
 class Game:
-    
-    objects = []
     
     def __init__(self, view_width=768, view_height=768,
                  fps=60.0, title="The Legend of Tao"):
         self.__width = view_width
         self.__height = view_height
         self.__fps = fps
-        
+
         turtle.setup(self.__width,
                      self.__height)
         turtle.title(title)
@@ -18,7 +17,7 @@ class Game:
         turtle.ht()
         turtle.penup()
         turtle.setundobuffer(0)
-        
+
         self._time = time.time()
         self._screen = None
 
@@ -32,17 +31,20 @@ class Game:
             pass
         turtle.update()
         self._time = time.time()
-        
+
     def change_screen(self, screen):
         if not isinstance(screen, GameScreen):
             raise TypeError(f"{screen} is not a GameScreen")
         self._screen = screen
         turtle.clearscreen()
+        turtle.setworldcoordinates(0, 0, self.__width, self.__height)
         screen.makescreen()
-
+        turtle.listen()
 
 class GameScreen:
     
+    keybinds = {}
+
     def __init__(self, bgcolor="black"):
         self.bgcolor = bgcolor
 
@@ -53,22 +55,20 @@ class GameScreen:
     def render(self):
         pass
 
+    def register_keybind(self, key, event, description=""):
+        self.keybinds[key] = description
+        turtle.onkey(event, key)
 
-""" class TestScreen(GameScreen):
+class PlayingScreen(GameScreen):
     
-    def __init__(self):
+    def __init__(self, player):
         super().__init__()
+        self.player = player
 
     def render(self):
-        renderer = turtle.Turtle()
-        renderer.color("white")
-
-class TestScreen2(GameScreen):
-    
-    def __init__(self):
-        super().__init__()
-    
-    def render(self):
-        renderer_b = turtle.Turtle()
-        renderer_b.color("red")
-        renderer_b.fd(100) """
+        self.controller = entities.PlayerController(self.player)
+        self.register_keybind("w", self.controller.move_up)
+        self.register_keybind("a", self.controller.move_left)
+        self.register_keybind("s", self.controller.move_down)
+        self.register_keybind("d", self.controller.move_right)
+        self.register_keybind("1", self.controller.use_item_one)

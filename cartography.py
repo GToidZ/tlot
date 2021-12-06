@@ -3,8 +3,7 @@ from time import time_ns
 
 class GameWorld:
     
-    def __init__(self, name, seed=""):
-        self.name = name
+    def __init__(self, seed=""):
         self.seed = seed
         self.__size = 24
         self.regions = []
@@ -321,7 +320,7 @@ class ThroneRegion(LandRegion):
         pass
 
 
-""" world = GameWorld("Test")
+world = GameWorld("Test")
 print(world.seed)
 print(world.spawnpoint)
-world.ascii_map() """
+world.ascii_map()

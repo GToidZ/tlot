@@ -21,6 +21,7 @@ class Game:
         self._time = time.time()
         self._screen = None
 
+
     def tick(self):
         # Updates the entire game
         self.update_screen()
@@ -41,11 +42,13 @@ class Game:
         screen.makescreen()
         turtle.listen()
 
+
 class GameScreen:
     
     keybinds = {}
 
-    def __init__(self, bgcolor="black"):
+    def __init__(self, root, bgcolor="black"):
+        self.root = root
         self.bgcolor = bgcolor
 
     def makescreen(self):
@@ -59,16 +62,31 @@ class GameScreen:
         self.keybinds[key] = description
         turtle.onkey(event, key)
 
-class PlayingScreen(GameScreen):
+class MenuScreen(GameScreen):
     
-    def __init__(self, player):
-        super().__init__()
+    def __init__(self, root):
+        super().__init__(root)
+
+    def render(self):
+        pass
+
+class PlayingScreen(GameScreen):
+
+    def __init__(self, root, player):
+        super().__init__(root)
         self.player = player
 
     def render(self):
+        self.create_player()
+
+    def create_player(self):
         self.controller = entities.PlayerController(self.player)
+        self.controller.goto(768 / 2, 640 / 2)
         self.register_keybind("w", self.controller.move_up)
         self.register_keybind("a", self.controller.move_left)
         self.register_keybind("s", self.controller.move_down)
         self.register_keybind("d", self.controller.move_right)
         self.register_keybind("1", self.controller.use_item_one)
+        self.register_keybind("2", self.controller.use_item_two)
+        self.register_keybind("3", self.controller.use_item_three)
+        self.register_keybind("4", self.controller.use_item_four)

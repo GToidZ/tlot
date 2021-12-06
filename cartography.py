@@ -1,4 +1,4 @@
-from random import Random, choice, randint
+from random import Random, choice
 from time import time_ns
 
 class GameWorld:
@@ -6,7 +6,6 @@ class GameWorld:
     def __init__(self, seed=""):
         self.seed = seed
         self.__size = 24
-        self.regions = []
         self.__prng = Random(self.seed)
         self.__islandmap = self.gen_geography()
         self.spawnpoint = self.select_spawnpoint()
@@ -47,7 +46,7 @@ class GameWorld:
             x = self.__prng.randint(6,self.__size - 6)
             y = self.__prng.randint(6,self.__size - 6)
             if not self.__islandmap[x][y]:
-                return [x,y]
+                return [x, y]
 
     def scale_tiers(self):
         center = self.spawnpoint
@@ -93,6 +92,12 @@ class GameWorld:
                             else:
                                 biomemap[x][y] = DesertRegion()
         return biomemap
+    
+    def get_region(self, x, y):
+        if any([x > len(self.__biomemap) - 1, x < 0,
+                y > len(self.__biomemap[0]) - 1, y < 0]):
+            return None
+        return self.__biomemap[x][y]
 
     def ascii_map(self):
         for x in range(self.__size):
@@ -320,7 +325,7 @@ class ThroneRegion(LandRegion):
         pass
 
 
-world = GameWorld("Test")
+""" world = GameWorld("Test")
 print(world.seed)
 print(world.spawnpoint)
-world.ascii_map()
+world.ascii_map() """

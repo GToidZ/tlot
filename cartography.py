@@ -314,18 +314,3 @@ class SnowRegion(LandRegion):
     def populate(self):
         # TODO: Add entities entries to populate.
         pass
-
-class ThroneRegion(LandRegion):
-
-    def __init__(self):
-        super().__init__(4, "throne")
-
-    def populate(self):
-        # TODO: Add entities entries to populate.
-        pass
-
-
-""" world = GameWorld("Test")
-print(world.seed)
-print(world.spawnpoint)
-world.ascii_map() """

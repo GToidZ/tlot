@@ -1,6 +1,7 @@
 from turtle import Turtle
 from items import Item, Inventory
 from cartography import GameWorld, WaterRegion
+import util
 
 class Player:
 
@@ -13,27 +14,30 @@ class Player:
         self.requirements = [20, 30, 40]
         self.region = world.spawnpoint
 
-        self.can_swim = False
+        self.can_swim = True
         self.can_escape = False
 
         self.inventory = Inventory(self)
-        
-        self.x = 0
-        self.y = 0
+
+        self.x = 768 / 2
+        self.y = 640 / 2
 
 
 class PlayerController(Turtle):
 
-    def __init__(self, player: Player):
+    def __init__(self, root, player: Player, x, y):
         super().__init__("turtle", 0, True)
         self.turtlesize(1.5, 1.5)
         self.color(1, 1, 1)
         self.penup()
         self.speed(0)
+        self.root = root
         self.player = player
         self.speedmod = 1
         self.invincible = False
+        self.__new_region = False
 
+        self.goto(x, y)
         self.update_coords()
 
     def current_region(self):
@@ -50,11 +54,14 @@ class PlayerController(Turtle):
                     return
                 region[0] += -1
                 self.goto(self.xcor(), 0.0)
+                self.__new_region = True
             return
         self.goto(self.xcor(), self.ycor() + 32 * self.speedmod)
         if self.ycor() >= 640.0:
             self.goto(self.xcor(), self.ycor() - (self.ycor() - 640))
         self.update_coords()
+        if self.__new_region:
+            util.update_region(self.root, self.player, self.player.world)
 
     def move_down(self):
         self.setheading(270)
@@ -67,11 +74,14 @@ class PlayerController(Turtle):
                     return
                 region[0] += 1
                 self.goto(self.xcor(), 640.0)
+                self.__new_region = True
             return
         self.goto(self.xcor(), self.ycor() - 32 * self.speedmod)
         if self.ycor() <= 0.0:
             self.goto(self.xcor(), 0.0)
         self.update_coords()
+        if self.__new_region:
+            util.update_region(self.root, self.player, self.player.world)
 
     def move_left(self):
         self.setheading(180)
@@ -84,12 +94,15 @@ class PlayerController(Turtle):
                     return
                 region[1] += -1
                 self.goto(768.0, self.ycor())
+                self.__new_region = True
             return
         self.goto(self.xcor() - 32 * self.speedmod, self.ycor())
         if self.xcor() <= 0.0:
             self.goto(0.0, self.ycor())
         self.update_coords()
-        
+        if self.__new_region:
+            util.update_region(self.root, self.player, self.player.world)
+
     def move_right(self):
         self.setheading(0)
         if self.xcor() >= 768.0:
@@ -101,12 +114,15 @@ class PlayerController(Turtle):
                     return
                 region[1] += 1
                 self.goto(0.0, self.ycor())
+                self.__new_region = True
             return
         self.goto(self.xcor() + 32 * self.speedmod, self.ycor())
         if self.xcor() >= 768.0:
             self.goto(self.xcor() - (self.xcor() - 768), self.ycor())
         self.update_coords()
-        
+        if self.__new_region:
+            util.update_region(self.root, self.player, self.player.world)
+
     def use_item_one(self):
         self.use_item("1")
 

@@ -1,6 +1,7 @@
 import turtle
 import time
 import entities
+import cartography as car
 
 class Game:
     
@@ -72,16 +73,17 @@ class MenuScreen(GameScreen):
 
 class PlayingScreen(GameScreen):
 
-    def __init__(self, root, player):
+    def __init__(self, root, player, world):
         super().__init__(root)
         self.player = player
+        self.world = world
 
     def render(self):
-        self.create_player()
+        self.draw_background()
+        self.create_player(self.root, self.player.x, self.player.y)
 
-    def create_player(self):
-        self.controller = entities.PlayerController(self.player)
-        self.controller.goto(768 / 2, 640 / 2)
+    def create_player(self, root, x, y):
+        self.controller = entities.PlayerController(root, self.player, x, y)
         self.register_keybind("w", self.controller.move_up)
         self.register_keybind("a", self.controller.move_left)
         self.register_keybind("s", self.controller.move_down)
@@ -90,3 +92,37 @@ class PlayingScreen(GameScreen):
         self.register_keybind("2", self.controller.use_item_two)
         self.register_keybind("3", self.controller.use_item_three)
         self.register_keybind("4", self.controller.use_item_four)
+
+    def draw_background(self):
+        region = self.player.region
+        map_pointer = self.world.get_region(region[0], region[1])
+        color = "white"
+        if isinstance(map_pointer, car.WaterRegion):
+            color = "#64B0FE"
+        elif isinstance(map_pointer, (car.SpawnRegion, car.GrasslandRegion)):
+            color = "#89D900"
+        elif isinstance(map_pointer, (car.PlateauRegion)):
+            color = "#EB9F23"
+        elif isinstance(map_pointer, (car.ForestRegion)):
+            color = "#0D9400"
+        elif isinstance(map_pointer, (car.MountainsRegion)):
+            color = "#666666"
+        elif isinstance(map_pointer, (car.JungleRegion)):
+            color = "#004F08"
+        elif isinstance(map_pointer, (car.SnowRegion)):
+            color = "#48CEDF"
+        elif isinstance(map_pointer, (car.DesertRegion)):
+            color = "#E5E695"
+        painter = turtle.Turtle("circle", 0, False)
+        painter.speed(0)
+        painter.color("black", color)
+        painter.penup()
+        painter.goto(-60, -60)
+        painter.pendown()
+        painter.begin_fill()
+        for _ in range(2):
+            painter.forward(828)
+            painter.left(90)
+            painter.forward(740)
+            painter.left(90)
+        painter.end_fill()

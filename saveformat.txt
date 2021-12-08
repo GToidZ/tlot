@@ -5,11 +5,10 @@ magic(4) - 01 4B 55 02 - SOH K U STX
 datetime(7) - YY YY MM DD hh mm ss - state datetime as hexadecimal numbers
 seed(20)
 ---
-1: Player Info Section (25+1)
+1: Player Info Section (24+1)
 name(16) - 00 are ignored
 last_position(2) - if not in range of hexadecimal 00 - 23, raise error, defaults to world spawn
 score(5) - reversed (earlier bytes are the rightmost numbers) - if not in range of hexadecimal 00 - 09, raise error
-current_hp(1) - if not in range of hexadecimal 00 - 10, raise error
 tier(1) - if not in range of hexadecimal 00 - 03, raise error
 ---
 2: Player Boolean Section (1+1)

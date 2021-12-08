@@ -113,7 +113,7 @@ class GameWorld:
             y = self.__prng.randint(6, self.__size - 6)
             if not self.__islandmap[x][y] and self.__tiermap[x][y] == 0 \
                 and [x, y] != self.spawnpoint:
-                self.itemmap[raft] = [x, y]
+                self.itemmap[raft] = self.spawnpoint
                 break
         while len(all_items) > 0:
             item = all_items.pop(0)

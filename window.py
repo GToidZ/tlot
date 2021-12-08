@@ -25,6 +25,8 @@ class Game:
         
         self.elapsed = 0
         self.entities = {}
+        
+        self.save = ""
 
     def tick(self):
         # Updates the entire game
@@ -80,7 +82,7 @@ class GameScreen:
         turtle.onkey(event, key)
 
 class MenuScreen(GameScreen):
-    
+
     def __init__(self, root):
         super().__init__(root)
         self.choice = 0
@@ -167,10 +169,12 @@ class PlayingScreen(GameScreen):
         
         self.curr_score = player.score
         self.curr_hp = player.hp
+        self.curr_items = player.inventory.active
 
     def render(self):
         self.draw_background()
         self.create_player(self.root, self.player.x, self.player.y)
+        self.ts, self.th, self.ti = self.draw_ui()
 
     def create_player(self, root, x, y):
         self.controller = entities.PlayerController(root, self.player, x, y)
@@ -183,6 +187,7 @@ class PlayingScreen(GameScreen):
         self.register_keybind("3", self.controller.use_item_three)
         self.register_keybind("4", self.controller.use_item_four)
         self.register_keybind("space", self.controller.attack)
+        self.register_keybind("Escape", self.save)
 
     def draw_background(self):
         region = self.player.region
@@ -221,7 +226,62 @@ class PlayingScreen(GameScreen):
     def add_entity(self, entity):
         self.root.entities[entity] = [entity.x, entity.y]
 
+    def draw_ui(self):
+        score = turtle.Turtle("circle", 0, False)
+        hp = turtle.Turtle("circle", 0, False)
+        items = turtle.Turtle("circle", 0, False)
+        score.penup()
+        hp.penup()
+        items.penup()
+        score.color("white")
+        hp.color("white")
+        items.color("white")
+        score.speed(0)
+        hp.speed(0)
+        items.speed(0)
+        score.goto(384, 700)
+        score.write(str(self.curr_score), align="center", font=("Arial", 24, "normal"))
+        hp.goto(192, 700)
+        hp.write(f"HP: {self.curr_hp}", align="left", font=("Arial", 12, "normal"))
+        items.goto(576, 700)
+        items.write(self.construct_items_string(), align="right", font=("Arial", 12, "normal"))
+        return score, hp, items
+        
+    def construct_items_string(self):
+        res = ""
+        for i in self.player.inventory.active:
+            res += i.name[0].upper()
+        if len(res) < 4:
+            res += " "*(4 - len(res))
+        if self.player.can_swim:
+            res += "   R"
+        else:
+            res += "    "
+        return res
+
+    def update_ui(self, score, hp, items):
+        if self.curr_score != self.player.score:
+            self.curr_score = self.player.score
+            score.clear()
+            score.write(str(self.curr_score), align="center", font=("Arial", 24, "normal"))
+        if self.curr_hp != self.player.hp:
+            self.curr_hp = self.player.hp
+            if self.curr_hp <= 1:
+                hp.color("red")
+            else:
+                hp.color("white")
+            hp.clear()
+            hp.write(f"HP: {self.curr_hp}", align="left", font=("Arial", 12, "normal"))
+        if self.curr_items != self.player.inventory.items:
+            self.curr_items = self.player.inventory.items
+            items.clear()
+            items.write(self.construct_items_string(), align="right", font=("Arial", 12, "normal"))            
+
+    def save(self):
+        util.save_game(self.root, self.player, self.world)
+
     def logic(self):
+        self.update_ui(self.ts, self.th, self.ti)
         if len(self.root.entities) != 0:
             for e in self.root.entities:
                 self.root.entities[e] = [e.x, e.y]

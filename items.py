@@ -38,9 +38,10 @@ class InvincibilityPot(Item):
         self.using = False
 
     def use(self, player):
-        if self.using: return
+        if self.using or player.invincible or player.drank: return
         self.using = True
         player.invincible = True
+        player.drank = True
         t = Timer(5, self.cancel, [player])
         t.start()
 
@@ -55,8 +56,9 @@ class LemonJuice(Item):
         self.using = False
 
     def use(self, player):
-        if self.using: return
+        if self.using or player.lemoned: return
         self.using = True
+        player.lemoned = True
         player.speedmod = 2
         t = Timer(5, self.cancel, [player])
         t.start()
@@ -74,6 +76,16 @@ class BowArrow(Item):
     def use(self, player):
         if self.using: return
         self.using = True
+        if player.heading() == 0.0:
+            direction = "right"
+        elif player.heading() == 90.0:
+            direction = "up"
+        elif player.heading() == 180.0:
+            direction = "left"
+        elif player.heading() == 270.0:
+            direction = "down"
+        player.shoot_arrow(direction)
+        self.using = False
         # TODO: Fire arrow to enemy, make a new turtle?
 
 class CannedJellyfish(Item):

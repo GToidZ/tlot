@@ -43,6 +43,8 @@ class PlayerController(Turtle):
         self.speedmod = 1
         self.attacking = False
         self.invincible = False
+        self.drank = False
+        self.lemoned = False
         self.healed = False
         self.__new_region = False
 
@@ -205,9 +207,30 @@ class PlayerController(Turtle):
         particle.clear()
         particle.penup()
 
+    def shoot_arrow(self, direction):
+        if direction not in ["right", "up", "left", "down"]:
+            direction = "right"
+        arrow = Turtle("triangle", 0)
+        angles = {"right": 0.0, "up": 90.0, "left": 180.0, "down": 270.0}
+        arrow.color("white")
+        arrow.speed(0)
+        arrow.penup()
+        arrow.goto(self.player.x, self.player.y)
+        arrow.setheading(angles[direction])
+        arrow.speed(2)
+        if direction == "right":
+            arrow.fd(abs(768.0 - self.player.x))
+        elif direction == "left":
+            arrow.fd(abs(0.0 - self.player.x))
+        elif direction == "up":
+            arrow.fd(abs(640.0 - self.player.y))
+        elif direction == "down":
+            arrow.fd(abs(0.0 - self.player.y))
+        arrow.ht()
+
     def check_dead(self):
         if self.player.hp <= 0:
-            util.game_over(self.root, self.player, self.player.world)
+            util.game_over(self.root)
 
     def update_coords(self):
         self.player.x = self.xcor()

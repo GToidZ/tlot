@@ -2,6 +2,7 @@ import random
 import turtle
 import cartography as car
 import entities as ent
+from items import LemonJuice
 import window as win
 import data
 import string
@@ -56,6 +57,8 @@ def new_game(root):
     root.save = "game.save"
     world = car.GameWorld()
     player = ent.Player(name, world)
+    item = LemonJuice()
+    player.inventory.add(item)
     update_region(root, player, world)
     return True
 

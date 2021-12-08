@@ -22,6 +22,24 @@ Make sure you have all the required software installed.
 tlot/ > python app.py
 ```
 
+## Controls
+### Main Menu
+<kbd>↑</kbd>, <kbd>↓</kbd> - Select different menu choices
+
+<kbd>↵  Enter</kbd> - Confirm choice
+
+<kbd>Esc</kbd> - Quit the program
+
+### Gameplay
+<kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> - Moves the turtle
+
+<kbd>Space</kbd> - Attack
+
+<kbd>1-4</kbd> - Use active items
+
+<kbd>Esc</kbd> - Save and quit
+
+
 ## Program Design
 Since there are too many classes, we'll go through important ones.
 

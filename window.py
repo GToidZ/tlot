@@ -63,7 +63,6 @@ class Game:
         self._screen.makescreen()
         turtle.listen()
 
-
 class GameScreen:
     """ A turtle Screen wrapper, with abstract render() and logic() method
     """

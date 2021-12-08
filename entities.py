@@ -5,7 +5,8 @@ from cartography import GameWorld, WaterRegion
 import util
 
 class Player:
-
+    """ Abstract class containing universal values for player.
+    """
     def __init__(self, name: str, world: GameWorld):
         self.name = name
         self.world = world
@@ -31,7 +32,9 @@ class Player:
             self.xp = 0
 
 class PlayerController(Turtle):
-
+    """ Controller class of a player storing temporal values,
+    controlling functions and logic.
+    """
     def __init__(self, root, player: Player, x, y):
         super().__init__("turtle", 0, True)
         self.turtlesize(1.5, 1.5)
@@ -55,6 +58,9 @@ class PlayerController(Turtle):
         print(self.player.world.get_region(self.player.region[0], self.player.region[1]))
 
     def move_up(self):
+        """ Moves the turtle up, if at the border checks for
+        a new region at the offset.
+        """
         self.setheading(90)
         if self.ycor() >= 640.0:
             region = self.player.region
@@ -75,6 +81,9 @@ class PlayerController(Turtle):
             util.update_region(self.root, self.player, self.player.world)
 
     def move_down(self):
+        """ Moves the turtle down, if at the border checks for
+        a new region at the offset.
+        """
         self.setheading(270)
         if self.ycor() <= 0.0:
             region = self.player.region
@@ -95,6 +104,9 @@ class PlayerController(Turtle):
             util.update_region(self.root, self.player, self.player.world)
 
     def move_left(self):
+        """ Moves the turtle left, if at the border checks for
+        a new region at the offset.
+        """
         self.setheading(180)
         if self.xcor() <= 0.0:
             region = self.player.region
@@ -115,6 +127,9 @@ class PlayerController(Turtle):
             util.update_region(self.root, self.player, self.player.world)
 
     def move_right(self):
+        """ Moves the turtle right, if at the border checks for
+        a new region at the offset.
+        """
         self.setheading(0)
         if self.xcor() >= 768.0:
             region = self.player.region
@@ -147,6 +162,8 @@ class PlayerController(Turtle):
         self.use_item("4")
 
     def use_item(self, key):
+        """ Use active item from the inventory.
+        """
         if isinstance(key, str):
             try:
                 key = int(key)
@@ -156,6 +173,8 @@ class PlayerController(Turtle):
             self.player.inventory.active[key - 1].use(self)
 
     def attack(self):
+        """ Fires an attack event and plays an effect with a new Turtle.
+        """
         if self.attacking:
             return
         self.attacking = True
@@ -181,6 +200,8 @@ class PlayerController(Turtle):
         self.attacking = False
 
     def damage(self, root):
+        """ Executes the damaging logic.
+        """
         direction = self.heading()
         if direction == 0.0:
             pos = [self.xcor() + 32, self.ycor()]
@@ -200,6 +221,8 @@ class PlayerController(Turtle):
                         e.check_dead(self.player)
 
     def attack_particle(self, particle):
+        """ Displays an attack particle.
+        """
         particle.speed(3)
         particle.pendown()
         particle.pensize(8)
@@ -208,6 +231,8 @@ class PlayerController(Turtle):
         particle.penup()
 
     def shoot_arrow(self, direction):
+        """ Spawns new Turtle as a moving arrow.
+        """
         if direction not in ["right", "up", "left", "down"]:
             direction = "right"
         arrow = Turtle("triangle", 0)
@@ -229,8 +254,10 @@ class PlayerController(Turtle):
         arrow.ht()
 
     def check_dead(self):
+        """ Check if the player is dead.
+        """
         if self.player.hp <= 0:
-            util.game_over(self.root)
+            util.game_over(self.root, self.player)
 
     def update_coords(self):
         self.player.x = self.xcor()
@@ -244,7 +271,9 @@ class PlayerController(Turtle):
         return self.player
 
 class Entity(Turtle):
-    
+    """ An entity class for populating the world, with hit() that fires
+    every logic() tick.
+    """
     def __init__(self, x, y, shape="turtle", hp=0, has_brain=False):
         super().__init__(shape, 0, True)
         self.speed(0)
@@ -256,10 +285,13 @@ class Entity(Turtle):
         self.has_brain = has_brain
 
     def hit(self, target):
+        """ Fires once the a target is found.
+        """
         pass
 
 class ItemEntity(Entity):
-
+    """ Item as entity for player to collect on hit()
+    """
     def __init__(self, x, y, item):
         super().__init__(x, y, "circle")
         colors = ["green", "blue", "yellow", "magenta"]
@@ -277,7 +309,9 @@ class ItemEntity(Entity):
         self.collected = True
 
 class Enemy(Entity):
-    
+    """ Enemy that will randomly stroll in the map,
+    will damage player when hit() works.
+    """
     def __init__(self, x, y, tier, root):
         super().__init__(x, y, "turtle", (tier+1)*2, True)
         self.color("red")
@@ -307,10 +341,14 @@ class Enemy(Entity):
         player.invincible = False
 
     def work(self):
+        """ Fires every tick, has dynamic update speed.
+        """
         if self.root.elapsed % self.behavior_seed == 0:
             self.random_stroll()
 
     def random_stroll(self):
+        """ Consider moving or turning.
+        """
         i = random.randint(0, 1)
         if i == 0:
             if self.heading() == 0.0:
@@ -340,6 +378,8 @@ class Enemy(Entity):
                 self.left(180)
 
     def check_dead(self, player):
+        """ Check if the enemy is dead.
+        """
         if self.hp <= 0:
             self.dead = True
             self.hideturtle()

@@ -5,7 +5,8 @@ import cartography as car
 import util
 
 class Game:
-    
+    """ The root for the Turtle to run on.
+    """
     def __init__(self, view_width=768, view_height=768,
                  fps=60.0, title="The Legend of Tao"):
         self.__width = view_width
@@ -42,6 +43,8 @@ class Game:
         self._time = time.time()
 
     def change_screen(self, screen):
+        """ Clear the entire turtle program and renders a new screen.
+        """
         if not isinstance(screen, GameScreen):
             raise TypeError(f"{screen} is not a GameScreen")
         self._screen = screen
@@ -52,6 +55,8 @@ class Game:
         turtle.listen()
 
     def refresh(self):
+        """ Clear the entire turtle program and re-renders a screen.
+        """
         turtle.clearscreen()
         turtle.setworldcoordinates(0, 0, self.__width, self.__height)
         self.entities = {}
@@ -60,7 +65,8 @@ class Game:
 
 
 class GameScreen:
-    
+    """ A turtle Screen wrapper, with abstract render() and logic() method
+    """    
     keybinds = {}
 
     def __init__(self, root, bgcolor="black"):
@@ -72,17 +78,24 @@ class GameScreen:
         self.render()
 
     def render(self):
+        """ Fires once the screen has been made.
+        """
         pass
 
     def logic(self):
+        """ Fires every game tick.
+        """
         pass
 
     def register_keybind(self, key, event, description=""):
+        """ Registers keybind to a function
+        """
         self.keybinds[key] = description
         turtle.onkey(event, key)
 
 class MenuScreen(GameScreen):
-
+    """ Menu screen for the game.
+    """
     def __init__(self, root):
         super().__init__(root)
         self.choice = 0
@@ -90,6 +103,9 @@ class MenuScreen(GameScreen):
         self.choices = {}
 
     def add_choice(self, x, y, label, fun):
+        """ Add a choice to the main menu.
+        Creates new turtle and registering it with a label.
+        """
         choice_bullet = turtle.Turtle("circle", 0, False)
         choice_bullet.speed(0)
         choice_bullet.shapesize(1, 1)
@@ -110,6 +126,8 @@ class MenuScreen(GameScreen):
                 t.hideturtle()
 
     def moveup(self):
+        """ Moves the bullet up.
+        """
         if self.choice <= 0:
             self.update()
             return
@@ -117,6 +135,8 @@ class MenuScreen(GameScreen):
         self.update()
 
     def movedown(self):
+        """ Moves the bullet down.
+        """
         if self.choice >= len(self.turtles) - 1:
             self.update()
             return
@@ -124,9 +144,13 @@ class MenuScreen(GameScreen):
         self.update()
 
     def select(self):
+        """ Executes the selected choice.
+        """
         self.choices[str(self.choice)]()
 
     def new_game(self):
+        """ Fires new game event.
+        """
         if not util.new_game(self.root):
             self.choice = 0
             self.turtles = []
@@ -134,6 +158,8 @@ class MenuScreen(GameScreen):
             self.root.refresh()
 
     def load_game(self):
+        """ Fires load game event.
+        """
         if not util.load_game(self.root):
             self.choice = 0
             self.turtles = []
@@ -141,6 +167,8 @@ class MenuScreen(GameScreen):
             self.root.refresh()
 
     def exit(self):
+        """ Exits the program.
+        """
         turtle.bye()
 
     def render(self):
@@ -161,7 +189,8 @@ class MenuScreen(GameScreen):
         self.update()
 
 class PlayingScreen(GameScreen):
-
+    """ A screen of the gameplay.
+    """
     def __init__(self, root, player, world):
         super().__init__(root)
         self.player = player
@@ -177,6 +206,8 @@ class PlayingScreen(GameScreen):
         self.ts, self.th, self.ti = self.draw_ui()
 
     def create_player(self, root, x, y):
+        """ Creates a player at the x, y of screen and assign keybinds.
+        """
         self.controller = entities.PlayerController(root, self.player, x, y)
         self.register_keybind("w", self.controller.move_up)
         self.register_keybind("a", self.controller.move_left)
@@ -190,6 +221,8 @@ class PlayingScreen(GameScreen):
         self.register_keybind("Escape", self.save)
 
     def draw_background(self):
+        """ Draws game background with color according to Region types.
+        """
         region = self.player.region
         map_pointer = self.world.get_region(region[0], region[1])
         color = "white"
@@ -224,9 +257,13 @@ class PlayingScreen(GameScreen):
         painter.end_fill()
 
     def add_entity(self, entity):
+        """ Register new entity to the screen for tracking.
+        """
         self.root.entities[entity] = [entity.x, entity.y]
 
     def draw_ui(self):
+        """ Draws UI components.
+        """
         score = turtle.Turtle("circle", 0, False)
         hp = turtle.Turtle("circle", 0, False)
         items = turtle.Turtle("circle", 0, False)
@@ -260,6 +297,8 @@ class PlayingScreen(GameScreen):
         return res
 
     def update_ui(self, score, hp, items):
+        """ Updates UI components every tick.
+        """
         if self.curr_score != self.player.score:
             self.curr_score = self.player.score
             score.clear()
@@ -278,6 +317,8 @@ class PlayingScreen(GameScreen):
             items.write(self.construct_items_string(), align="right", font=("Arial", 12, "normal"))            
 
     def save(self):
+        """ Fires a save game event.
+        """
         util.save_game(self.root, self.player, self.world)
 
     def logic(self):
@@ -294,9 +335,11 @@ class PlayingScreen(GameScreen):
                     e.hit(self.controller)
 
 class GameOverScreen(GameScreen):
-    
-    def __init__(self, root):
+    """ A screen displaying Game Over in red and final score.
+    """
+    def __init__(self, root, player):
         super().__init__(root)
+        self.player = player
 
     def render(self):
         title = turtle.Turtle("circle", 0, False)
@@ -306,15 +349,15 @@ class GameOverScreen(GameScreen):
         title.color("red")
         title.write("Game Over", align="center",
                              font=("Arial", 48, "normal"))
-
-        subtitle = turtle.Turtle("circle", 0, False)
-        title.speed(0)
-        title.penup()
         title.goto(384, 384 - 64)
+        title.color("white")
+        title.write(f"Final Score: {self.player.score}", align="center",
+                             font=("Arial", 16, "normal"))
+        title.goto(384, 384 - 64 - 32)
         title.color("white")
         title.write("Press ESC to exit", align="center",
                              font=("Arial", 16, "normal"))
-        
+
         self.register_keybind("Escape", self.exit)
         
     def exit(self):

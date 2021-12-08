@@ -3,7 +3,9 @@ from time import time_ns
 import items
 
 class GameWorld:
-    
+    """ World class for sandboxing and simulating a game world.
+    The world generation is based on Cellular Automata.
+    """
     def __init__(self, seed=""):
         self.seed = seed
         self.__size = 24
@@ -13,15 +15,6 @@ class GameWorld:
         self.__tiermap = self.scale_tiers()
         self.__biomemap = self.populate_biomes()
         self.itemmap = self.place_items()
-
-    @property
-    def name(self):
-        return self.__name
-    @name.setter
-    def name(self, name):
-        if not isinstance(name, str):
-            raise TypeError("World name must be a string")
-        self.__name = name
 
     @property
     def seed(self):
@@ -38,15 +31,21 @@ class GameWorld:
         return self.__prng
 
     def gen_seed(self):
+        """ Generates a 20-character length seed string.
+        """
         fun = ["angel", "basalisk", "chimera", "cockatrice", "cyclops", "devil", \
             "goblin", "ogre", "pegasus", "phoenix", "unicorn"]
         return (choice(fun) + str(time_ns()))[:20]
 
     def gen_geography(self):
+        """ Generates a new world map using Cellular Automata.
+        """
         worldmap = CellAutoIsland(self.__size, self.__size, self.__prng)
         return worldmap.map
 
     def select_spawnpoint(self):
+        """ Chooses a suitable spawnpoint.
+        """
         while True:
             x = self.__prng.randint(6,self.__size - 6)
             y = self.__prng.randint(6,self.__size - 6)
@@ -54,6 +53,8 @@ class GameWorld:
                 return [x, y]
 
     def scale_tiers(self):
+        """ Assigns each region of the world map with respective tiers.
+        """
         center = self.spawnpoint
         tiermap = [[0 for _ in range(self.__size)] for _ in range(self.__size)]
         for x in range(self.__size):
@@ -73,6 +74,8 @@ class GameWorld:
         return self.__tiermap
 
     def populate_biomes(self):
+        """ Assigns each region of the world map with respective biomes.
+        """
         biomemap = [[0 for _ in range(self.__size)] for _ in range(self.__size)]
         for x in range(self.__size):
             for y in range(self.__size):
@@ -102,6 +105,8 @@ class GameWorld:
         return biomemap
 
     def place_items(self):
+        """ Randomly places all items into the world map.
+        """
         self.itemmap = {}
         all_items = [items.InvincibilityPot(),
                      items.LemonJuice(),
@@ -113,7 +118,7 @@ class GameWorld:
             y = self.__prng.randint(6, self.__size - 6)
             if not self.__islandmap[x][y] and self.__tiermap[x][y] == 0 \
                 and [x, y] != self.spawnpoint:
-                self.itemmap[raft] = self.spawnpoint
+                self.itemmap[raft] = [x, y]
                 break
         while len(all_items) > 0:
             item = all_items.pop(0)
@@ -132,6 +137,8 @@ class GameWorld:
         return self.__biomemap[x][y]
 
     def ascii_map(self):
+        """ Prints world map into the console for debugging purposes.
+        """
         for x in range(self.__size):
             for y in range(self.__size):
                 if [x, y] == self.spawnpoint:
@@ -174,9 +181,11 @@ class GameWorld:
                         print("D", end="")
             print()
 
-
 class CellAutoIsland:
-
+    """ An implementation of Cellular Automata to generate
+    0s and 1s as a square grid. This algorithm can be finer down
+    until we get an archipelago-like world.
+    """
     def __init__(self, width, height, prng=Random()):
         self._width = width
         self._height = height
@@ -234,7 +243,8 @@ class CellAutoIsland:
 
 
 class Region:
-
+    """ An abstract class of Region to contain tier and type.
+    """
     def __init__(self, rtype, tier):
         self.rtype = rtype
         self.tier = tier
@@ -261,7 +271,8 @@ class Region:
         pass
 
 class LandRegion(Region):
-
+    """ Land where the Player can move freely.
+    """
     def __init__(self, tier, biome=""):
         super().__init__("land", tier)
         self.biome = biome
@@ -275,7 +286,8 @@ class LandRegion(Region):
         self.__biome = biome
 
 class WaterRegion(Region):
-
+    """ Water where Player is required to have a Raft before crossing.
+    """
     def __init__(self, tier):
         super().__init__("water", tier)
 
@@ -289,60 +301,32 @@ class GrasslandRegion(LandRegion):
     def __init__(self):
         super().__init__(0, "grassland")
 
-    def populate(self, screen):
-        # TODO: Add entities entries to populate.
-        pass
-
 class ForestRegion(LandRegion):
 
     def __init__(self):
         super().__init__(1, "forest")
-
-    def populate(self, screen):
-        # TODO: Add entities entries to populate.
-        pass
 
 class PlateauRegion(LandRegion):
 
     def __init__(self):
         super().__init__(1, "plateau")
 
-    def populate(self, screen):
-        # TODO: Add entities entries to populate.
-        pass
-
 class JungleRegion(LandRegion):
 
     def __init__(self):
         super().__init__(2, "jungle")
-
-    def populate(self, screen):
-        # TODO: Add entities entries to populate.
-        pass
 
 class MountainsRegion(LandRegion):
 
     def __init__(self):
         super().__init__(2, "mountains")
 
-    def populate(self, screen):
-        # TODO: Add entities entries to populate.
-        pass
-
 class DesertRegion(LandRegion):
 
     def __init__(self):
         super().__init__(3, "desert")
 
-    def populate(self, screen):
-        # TODO: Add entities entries to populate.
-        pass
-
 class SnowRegion(LandRegion):
 
     def __init__(self):
         super().__init__(3, "snow")
-
-    def populate(self, screen):
-        # TODO: Add entities entries to populate.
-        pass

@@ -5,12 +5,15 @@ import entities as ent
 import window as win
 import data
 import string
-import items
 
 valid_x = [x*32 for x in range(2, 23)]
 valid_y = [x*32 for x in range(2, 19)]
 
 def update_region(root, player, world):
+    """ Fires when the player goes into a new region,
+    the map updates and the screen re-renders with
+    a new map.
+    """
     for e in root.entities:
         if isinstance(e, ent.Enemy) and e.isvisible():
             player.score -= (e.tier + 1) * 100
@@ -33,6 +36,9 @@ def update_region(root, player, world):
                                     world.get_tiermap()[x][y], root))
 
 def new_game(root):
+    """ The new game event, takes player name as input
+    and creates a new world with random seed.
+    """
     name = turtle.textinput("TLoT",
                             "Enter a player name (ASCII, max 16 chars):")
     if not name:
@@ -50,28 +56,41 @@ def new_game(root):
     root.save = "game.save"
     world = car.GameWorld()
     player = ent.Player(name, world)
-    bow = items.BowArrow()
-    player.inventory.add(bow)
     update_region(root, player, world)
     return True
 
 def load_game(root):
+    """ The load game event, if "game.save" is not found it takes
+    another file with ".save" extension instead. Then, it
+    regenerates the world and loads player data.
+    """
     try:
         open("game.save", "rb")
+        dat = data.GameData()
+        root.save = "game.save"
     except IOError:
         filename = turtle.textinput("TLoT", "Enter a TLoT .save filename:")
         if not filename:
             return False
         try:
             open(filename + ".save", "rb")
+            dat = data.GameData(filename + ".save")
+            root.save = filename + ".save"
         except IOError:
             return False
+    player, world = dat.load()
+    update_region(root, player, world)
+    return True
 
 def save_game(root, player, world):
+    """ The save game event, creates a new save file.
+    """
     dt = data.GameData(root.save)
     dt.save(player, world)
     turtle.bye()
 
-def game_over(root):
-    scr = win.GameOverScreen(root)
+def game_over(root, player):
+    """ The medium method for calling the game over screen.
+    """
+    scr = win.GameOverScreen(root, player)
     root.change_screen(scr)

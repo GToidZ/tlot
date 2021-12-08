@@ -1,7 +1,9 @@
 from threading import Timer
 
 class Item:
-
+    """ Abstract item class with use() method that fires
+    with either keybind or event.
+    """
     def __init__(self, key, name, description):
         self.key = key
         self.name = name
@@ -11,7 +13,9 @@ class Item:
         pass
 
 class SpecialItem(Item):
-    
+    """ Items that are not activatable should use this
+    class.
+    """
     def __init__(self, key, name, description):
         super().__init__(key, name, description)
 
@@ -19,7 +23,9 @@ class SpecialItem(Item):
         pass
 
 class Inventory:
-
+    """ Abstract inventory class that stores Item(s)
+    for a Player.
+    """
     def __init__(self, owner):
         self.owner = owner
         self.items = []
@@ -31,7 +37,9 @@ class Inventory:
             self.active.append(item)
 
 class InvincibilityPot(Item):
-    
+    """ Example active item that can be used with
+    a keybind:
+    """
     def __init__(self):
         super().__init__("A0", "Invincibility Potion",
                          "Temporal immortality!")
@@ -100,9 +108,11 @@ class CannedJellyfish(Item):
         player.healed = True
 
 class Raft(SpecialItem):
-    
+    """ Example special item that activates on
+    special conditions.
+    """
     def __init__(self):
-        super().__init__("FE", "Raft", "Traverse the waters!")
+        super().__init__("FF", "Raft", "Traverse the waters!")
 
     def use(self, player):
         player.get_player().can_swim = True

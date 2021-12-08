@@ -1,5 +1,7 @@
 import window as win
-import time
+
+""" Run this file to get started.
+"""
 
 game = win.Game()
 fsc = win.MenuScreen(game)

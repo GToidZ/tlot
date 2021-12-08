@@ -66,7 +66,7 @@ class Game:
 
 class GameScreen:
     """ A turtle Screen wrapper, with abstract render() and logic() method
-    """    
+    """
     keybinds = {}
 
     def __init__(self, root, bgcolor="black"):

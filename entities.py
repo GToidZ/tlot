@@ -1,5 +1,6 @@
+import random
 from turtle import Turtle
-from items import Item, Inventory
+from items import Inventory, SpecialItem
 from cartography import GameWorld, WaterRegion
 import util
 
@@ -11,17 +12,23 @@ class Player:
         self.score = 0
         self.tier = 0
         self.xp = 0
-        self.requirements = [20, 30, 40]
-        self.region = world.spawnpoint
+        self.hp = 5
+        self.region = world.spawnpoint.copy()
 
-        self.can_swim = True
-        self.can_escape = False
+        self.can_swim = False
 
         self.inventory = Inventory(self)
 
         self.x = 768 / 2
         self.y = 640 / 2
 
+    def check_exp(self):
+        required = [20, 30, 40]
+        if self.tier >= 3:
+            return
+        if self.xp == required[self.tier]:
+            self.tier += 1
+            self.xp = 0
 
 class PlayerController(Turtle):
 
@@ -34,7 +41,9 @@ class PlayerController(Turtle):
         self.root = root
         self.player = player
         self.speedmod = 1
+        self.attacking = False
         self.invincible = False
+        self.healed = False
         self.__new_region = False
 
         self.goto(x, y)
@@ -144,6 +153,62 @@ class PlayerController(Turtle):
         if key <= len(self.player.inventory.active):
             self.player.inventory.active[key - 1].use(self)
 
+    def attack(self):
+        if self.attacking:
+            return
+        self.attacking = True
+        direction = self.heading()
+        particle = Turtle("arrow", 0, False)
+        particle.color("white")
+        particle.speed(0)
+        particle.penup()
+        particle.setheading(direction - 90)
+        if direction == 0.0:
+            particle.goto(self.xcor() + 32, self.ycor() + 16)
+            self.attack_particle(particle)
+        if direction == 90.0:
+            particle.goto(self.xcor() - 16, self.ycor() + 32)
+            self.attack_particle(particle)
+        if direction == 180.0:
+            particle.goto(self.xcor() - 32, self.ycor() - 16)
+            self.attack_particle(particle)
+        if direction == 270.0:
+            particle.goto(self.xcor() + 16, self.ycor() - 32)
+            self.attack_particle(particle)
+        self.damage(self.root)
+        self.attacking = False
+
+    def damage(self, root):
+        direction = self.heading()
+        if direction == 0.0:
+            pos = [self.xcor() + 32, self.ycor()]
+        if direction == 90.0:
+            pos = [self.xcor(), self.ycor() + 32]
+        if direction == 180.0:
+            pos = [self.xcor() - 32, self.ycor()]
+        if direction == 270.0:
+            pos = [self.xcor(), self.ycor() - 32]
+        if pos in root.entities.values():
+            sel = [k for k, v in root.entities.items() if v == pos]
+            for e in sel:
+                if isinstance(e, Enemy):
+                    dmg_out = self.player.tier + 1
+                    e.hp -= dmg_out
+                    if not e.dead:
+                        e.check_dead(self.player)
+
+    def attack_particle(self, particle):
+        particle.speed(3)
+        particle.pendown()
+        particle.pensize(8)
+        particle.fd(32)
+        particle.clear()
+        particle.penup()
+
+    def check_dead(self):
+        if self.player.hp <= 0:
+            util.game_over(self.root, self.player, self.player.world)
+
     def update_coords(self):
         self.player.x = self.xcor()
         self.player.y = self.ycor()
@@ -155,6 +220,107 @@ class PlayerController(Turtle):
     def get_player(self):
         return self.player
 
-""" class Entity(Turtle):
+class Entity(Turtle):
     
-    def __init__(self, ) """
+    def __init__(self, x, y, shape="turtle", hp=0, has_brain=False):
+        super().__init__(shape, 0, True)
+        self.speed(0)
+        self.penup()
+        self.goto(x, y)
+        self.x = x
+        self.y = y
+        self.hp = hp
+        self.has_brain = has_brain
+
+    def hit(self, target):
+        pass
+
+class ItemEntity(Entity):
+
+    def __init__(self, x, y, item):
+        super().__init__(x, y, "circle")
+        colors = ["green", "blue", "yellow", "magenta"]
+        self.color(random.choice(colors))
+        self.collected = False
+        self.item = item
+
+    def hit(self, player):
+        if self.collected:
+            return
+        player.get_player().inventory.add(self.item)
+        if isinstance(self.item, SpecialItem):
+            self.item.use(player)
+        self.hideturtle()
+        self.collected = True
+
+class Enemy(Entity):
+    
+    def __init__(self, x, y, tier, root):
+        super().__init__(x, y, "turtle", (tier+1)*2, True)
+        self.color("red")
+        self.turtlesize(1.5, 1.5)
+        self.dead = False
+        self.tier = tier
+        self.behavior_seed = random.randint(10, 40)
+        self.root = root
+
+    def hit(self, player):
+        if player.invincible or self.dead:
+            return
+        dmg_out = (self.tier - player.get_player().tier) + 1
+        if dmg_out <= 0:
+            dmg_out = 1
+        player.get_player().hp -= dmg_out
+        player.check_dead()
+        player.invincible = True
+        if self.heading() == 0.0:
+            player.set_coords(player.xcor() + 64, player.ycor())
+        if self.heading() == 90.0:
+            player.set_coords(player.xcor(), player.ycor() + 64)
+        if self.heading() == 180.0:
+            player.set_coords(player.xcor() - 64, player.ycor())
+        if self.heading() == 270.0:
+            player.set_coords(player.xcor(), player.ycor() - 64)
+        player.invincible = False
+
+    def work(self):
+        if self.root.elapsed % self.behavior_seed == 0:
+            self.random_stroll()
+
+    def random_stroll(self):
+        i = random.randint(0, 1)
+        if i == 0:
+            if self.heading() == 0.0:
+                if self.x + 32.0 > 768.0:
+                    return
+                self.x += 32.0
+            if self.heading() == 90.0:
+                if self.y + 32.0 > 640.0:
+                    return
+                self.y += 32.0
+            if self.heading() == 180.0:
+                if self.x - 32.0 < 0.0:
+                    return
+                self.x -= 32.0
+            if self.heading() == 270.0:
+                if self.y - 32.0 < 0.0:
+                    return
+                self.y -= 32.0
+            self.forward(32)
+        elif i == 1:
+            j = random.randint(0, 2)
+            if j == 0:
+                self.left(90)
+            if j == 1:
+                self.right(90)
+            if j == 2:
+                self.left(180)
+
+    def check_dead(self, player):
+        if self.hp <= 0:
+            self.dead = True
+            self.hideturtle()
+            player.score += (self.tier + 1) * 100
+            if self.tier >= player.tier:
+                player.xp += 1
+            player.check_exp()

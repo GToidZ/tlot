@@ -1,5 +1,6 @@
 from random import Random, choice
 from time import time_ns
+import items
 
 class GameWorld:
     
@@ -11,6 +12,7 @@ class GameWorld:
         self.spawnpoint = self.select_spawnpoint()
         self.__tiermap = self.scale_tiers()
         self.__biomemap = self.populate_biomes()
+        self.itemmap = self.place_items()
 
     @property
     def name(self):
@@ -31,6 +33,9 @@ class GameWorld:
         if len(seed) < 6:
             seed = self.gen_seed()
         self.__seed = seed
+
+    def get_prng(self):
+        return self.__prng
 
     def gen_seed(self):
         fun = ["angel", "basalisk", "chimera", "cockatrice", "cyclops", "devil", \
@@ -64,6 +69,9 @@ class GameWorld:
                     tiermap[x][y] = 1
         return tiermap
 
+    def get_tiermap(self):
+        return self.__tiermap
+
     def populate_biomes(self):
         biomemap = [[0 for _ in range(self.__size)] for _ in range(self.__size)]
         for x in range(self.__size):
@@ -92,7 +100,31 @@ class GameWorld:
                             else:
                                 biomemap[x][y] = DesertRegion()
         return biomemap
-    
+
+    def place_items(self):
+        self.itemmap = {}
+        all_items = [items.InvincibilityPot(),
+                     items.LemonJuice(),
+                     items.BowArrow(),
+                     items.CannedJellyfish()]
+        raft = items.Raft()
+        while True:
+            x = self.__prng.randint(6, self.__size - 6)
+            y = self.__prng.randint(6, self.__size - 6)
+            if not self.__islandmap[x][y] and self.__tiermap[x][y] == 0 \
+                and [x, y] != self.spawnpoint:
+                self.itemmap[raft] = [x, y]
+                break
+        while len(all_items) > 0:
+            item = all_items.pop(0)
+            while True:
+                x = self.__prng.randint(3, self.__size - 3)
+                y = self.__prng.randint(3, self.__size - 3)
+                if [x, y] not in self.itemmap.values():
+                    self.itemmap[item] = [x, y]
+                    break
+        return self.itemmap
+
     def get_region(self, x, y):
         if any([x > len(self.__biomemap) - 1, x < 0,
                 y > len(self.__biomemap[0]) - 1, y < 0]):
@@ -225,7 +257,7 @@ class Region:
             raise TypeError("tier must be integer")
         self.__tier = tier
 
-    def populate(self):
+    def populate(self, screen):
         pass
 
 class LandRegion(Region):
@@ -257,7 +289,7 @@ class GrasslandRegion(LandRegion):
     def __init__(self):
         super().__init__(0, "grassland")
 
-    def populate(self):
+    def populate(self, screen):
         # TODO: Add entities entries to populate.
         pass
 
@@ -266,7 +298,7 @@ class ForestRegion(LandRegion):
     def __init__(self):
         super().__init__(1, "forest")
 
-    def populate(self):
+    def populate(self, screen):
         # TODO: Add entities entries to populate.
         pass
 
@@ -275,7 +307,7 @@ class PlateauRegion(LandRegion):
     def __init__(self):
         super().__init__(1, "plateau")
 
-    def populate(self):
+    def populate(self, screen):
         # TODO: Add entities entries to populate.
         pass
 
@@ -284,7 +316,7 @@ class JungleRegion(LandRegion):
     def __init__(self):
         super().__init__(2, "jungle")
 
-    def populate(self):
+    def populate(self, screen):
         # TODO: Add entities entries to populate.
         pass
 
@@ -293,7 +325,7 @@ class MountainsRegion(LandRegion):
     def __init__(self):
         super().__init__(2, "mountains")
 
-    def populate(self):
+    def populate(self, screen):
         # TODO: Add entities entries to populate.
         pass
 
@@ -302,7 +334,7 @@ class DesertRegion(LandRegion):
     def __init__(self):
         super().__init__(3, "desert")
 
-    def populate(self):
+    def populate(self, screen):
         # TODO: Add entities entries to populate.
         pass
 
@@ -311,6 +343,6 @@ class SnowRegion(LandRegion):
     def __init__(self):
         super().__init__(3, "snow")
 
-    def populate(self):
+    def populate(self, screen):
         # TODO: Add entities entries to populate.
         pass

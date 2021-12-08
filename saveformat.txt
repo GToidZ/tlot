@@ -5,26 +5,23 @@ magic(4) - 01 4B 55 02 - SOH K U STX
 datetime(7) - YY YY MM DD hh mm ss - state datetime as hexadecimal numbers
 seed(20)
 ---
-1: Player Info Section (24+1)
+1: Player Info Section (25+1)
 name(16) - 00 are ignored
 last_position(2) - if not in range of hexadecimal 00 - 23, raise error, defaults to world spawn
 score(5) - reversed (earlier bytes are the rightmost numbers) - if not in range of hexadecimal 00 - 09, raise error
 current_hp(1) - if not in range of hexadecimal 00 - 10, raise error
+tier(1) - if not in range of hexadecimal 00 - 03, raise error
 ---
-2: Player Boolean Section (3+1)
+2: Player Boolean Section (1+1)
 00 is false, FF is true, if not 00 or FF, raise error
-dead(1) - if true, the game doesn't start, display death message
-can_escape(1) - if true, the turtle can freely travel without the need to kill all monsters in the region
 can_swim(1) - if true, the turtle can go into water regions
 ---
-3: Player Inventory Section (...+1)
+3: Player Inventory Section (4+1)
 * For item codes, refer to the item reference at the end of file. If any item does not exist in reference, raise error
-equipped(2) - two bytes represent the two slots, q and e respectively. 00 means nothing is equipped
-inventory(...) - no maximum length, if an item is added the length increases
+inventory(4) - assign active items to first, second, third and fourth slots respectively
 ---
-4: World Stats Section (23+1)
-time_elapsed(5) - reversed (earlier bytes are the rightmost numbers) - if not in range of hexadecimal 00 - 09, raise error
-world_items(3*6) - follows the format of REGION_X, REGION_Y, ITEM_CODE where REGION_? must be range of hexadecimal of 00 - 23
+4: World Stats Section (18)
+world_items(3*5) - follows the format of REGION_X, REGION_Y, ITEM_CODE where REGION_? must be range of hexadecimal of 00 - 23
 
 
 
@@ -36,8 +33,7 @@ Equippables
 A0 - Invicibility Potion - allows player to turn invincible for 3 seconds
 A1 - Lemon Juice - allows player to move quicker for 5 seconds
 A2 - Bow & Arrow - shoots arrow to damage enemy
-A3 - Hyper Beam - deals damage to enemies in a line (once per level)
+A3 - Jellyfish - fully heals the player (once per level)
 
 Special (Always spawn)
-FE - Raft - turns can_swim to FF
-FF - Ward Totem - turns can_escape to FF
+FF - Raft - turns can_swim to FF

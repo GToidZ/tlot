@@ -1,4 +1,3 @@
-import time
 from threading import Timer
 
 class Item:
@@ -35,7 +34,7 @@ class InvincibilityPot(Item):
     
     def __init__(self):
         super().__init__("A0", "Invincibility Potion",
-                         "Temporal immortality in just a sip.")
+                         "Temporal immortality!")
         self.using = False
 
     def use(self, player):
@@ -65,6 +64,28 @@ class LemonJuice(Item):
     def cancel(self, player):
         player.speedmod = 1
         self.using = False
+
+class BowArrow(Item):
+    
+    def __init__(self):
+        super().__init__("A2", "Bow and Arrow", "Bullseye!")
+        self.using = False
+
+    def use(self, player):
+        if self.using: return
+        self.using = True
+        # TODO: Fire arrow to enemy, make a new turtle?
+
+class CannedJellyfish(Item):
+    
+    def __init__(self):
+        super().__init__("A3", "Canned Jellyfish", "Tastes superb!")
+
+    def use(self, player):
+        if player.healed:
+            return
+        player.get_player().hp = 5
+        player.healed = True
 
 class Raft(SpecialItem):
     
